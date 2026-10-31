@@ -762,12 +762,10 @@ html{scroll-behavior:smooth}
 .still *,.still *::before,.still *::after{animation:none !important;transition:none !important}
 
 /* ───────── Diana: what's new on top of the template ───────── */
-/* gallery: the session types sit where the filters were */
-.gal-types{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px clamp(20px,2.4vw,36px);margin:0;padding:6px 0 18px;list-style:none;font-family:var(--serif);font-size:clamp(22px,2.1vw,30px);line-height:1.1;font-weight:500;color:var(--cat)}
-.gal-types li{white-space:nowrap}
-.gal-types a{display:inline-flex;align-items:center;gap:6px;color:var(--ink);text-decoration:none;background:linear-gradient(currentColor,currentColor) 0 100%/100% 1px no-repeat;padding-bottom:3px;transition:color .4s ease,background-size .6s var(--e)}
-.gal-types a:hover{color:var(--fill);background-size:0 1px;background-position:100% 100%}
-.gal-types svg{width:.6em;height:.6em}
+/* gallery: Weddings sits with the filters but opens her wedding page */
+.gf-x{align-items:center;gap:6px;text-decoration:none;color:var(--cat)}
+.gf-x svg{width:.55em;height:.55em;transition:transform .5s var(--e)}
+.gf-x:hover svg{transform:translate(2px,-2px)}
 a.gal-more{text-decoration:none}
 /* meet Diana: a few lines in her own words under the prints */
 .abio{max-width:600px;margin-top:clamp(48px,5.6vw,80px)}
@@ -776,12 +774,38 @@ a.gal-more{text-decoration:none}
 .abio-l{display:inline-flex;align-items:center;gap:8px;margin-top:10px;padding-bottom:5px;font-size:12px;line-height:16px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink);text-decoration:none;border-bottom:1px solid currentColor}
 .abio-l svg{width:14px;height:14px;transition:transform .5s var(--e)}
 .abio-l:hover svg{transform:translate(2px,-2px)}
+/* call to action: DI and ANA tuck in under the edges of the photo stack.
+   The whole word is centred and main.js slides the stack over the gap (--sx).
+   D and I are all thick upright strokes, so they get a lighter weight than A and N to look even. */
+.giant{display:grid;padding-inline:0;font-weight:420}
+.g1{grid-column:1;justify-self:end}
+.g2{grid-column:3;justify-self:start}
+.g-thin{font-weight:330}
+@media (min-width:601px){
+  .giant{grid-template-columns:auto calc(clamp(170px,27.8vw,400px) * 1.12) auto;justify-content:center}
+  .stack{margin-left:calc(clamp(170px,27.8vw,400px) / -2 + var(--sx,0px))}
+}
 /* five letters instead of eight: the wordmark can be bigger */
 .fwm{font-size:clamp(110px,27vw,390px)}
 @media (max-width:600px){
   .eb-x{display:none}
-  .gal-types{flex-wrap:nowrap;width:100%;gap:22px;padding:0 var(--pad) 14px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid rgba(46,64,46,.14);font-size:22px}
-  .gal-types::-webkit-scrollbar{display:none}
+  /* hero on phones: pills alternate right, left, right; the sentence ends flush right */
+  .hh .ln1>:nth-child(1){order:1}
+  .hh .ln1>:nth-child(2){order:2}
+  .hh .ipw.a{order:3;width:2.3em;margin-left:auto}
+  .hh .b1{order:4}
+  .hh .ipw.b{order:5;width:2.6em}
+  .hh .rot{order:6;margin-left:auto;justify-items:end}
+  .hh .b2{order:7}
+  .hh .ln2>.hw{order:8}
+  .hh .ln3>.hw:nth-child(2){order:9}
+  .hh .ipw.c{order:10;width:3.15em;margin-left:auto}
+  .hh .b3{order:11}
+  .hh .ln3>.hw:nth-child(3){order:12;margin-left:auto}
+  /* DI above the stack, ANA below it, both touching its edges */
+  .cta-stage{height:calc(min(58vw,280px) * .75 + min(31vw,150px) * 1.7)}
+  .giant{display:flex;padding:0}
+  .g1,.g2{grid-column:auto;justify-self:auto;align-self:center}
   .abio{margin-top:44px}
   .abio-t{font-size:15px;line-height:23px}
   .fwm{font-size:25vw}

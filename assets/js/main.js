@@ -240,6 +240,16 @@
   stack.addEventListener('mouseleave', function () { stackHover = false; });
   stack.addEventListener('click', function () { shuffle(true); });
 
+  // centre the word DIANA as a whole and slide the photo stack over the gap between DI and ANA
+  var ctaStage = $('.cta-stage'), giant = $('.giant'), g1 = $('.g1'), g2 = $('.g2');
+  function centerGiant() {
+    var grid = getComputedStyle(giant).display === 'grid';
+    var sx = grid ? (g1.offsetWidth - g2.offsetWidth) / 2 : 0;
+    ctaStage.style.setProperty('--sx', sx.toFixed(1) + 'px');
+  }
+  window.addEventListener('resize', centerGiant, { passive: true });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(centerGiant);
+
   // ---------- footer: magnetic badge, Zagreb clock, golden hour ----------
   badge.addEventListener('mousemove', function (e) {
     if (!canHover) return;
@@ -345,6 +355,7 @@
   }
   setInterval(function () { shuffle(false); }, 3800);
   if (!reduce) setTimeout(function () { heroNext(); setInterval(heroNext, 3800); }, 4600);
+  centerGiant();
   tickClock();
   setInterval(tickClock, 20000);
   parallax();

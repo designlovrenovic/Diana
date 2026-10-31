@@ -34,16 +34,25 @@
   photos.forEach(function (p) { byId[p.id] = p; });
   [note, quote, where].forEach(function (it) { byId[it.id] = it; });
   var items = photos.concat([note, quote, where]);
-  // the photos keep the same order everywhere; only the text tiles move so every row comes out full
-  var orderWide = ['family', 'qt', 'red', 'window', 'sea', 'tx2', 'ladder', 'rain', 'tx', 'lily'];
-  var orderPhone = ['family', 'qt', 'red', 'window', 'sea', 'ladder', 'tx', 'rain', 'lily'];
+  // filters: A = all, F = family & love stories, W = woman sessions.
+  // Photos keep the same order on every screen; the text tiles move so each row comes out full.
+  var CAT = { family: 'F', window: 'F', sea: 'F', red: 'W', ladder: 'W', rain: 'W', lily: 'W' };
+  var ORDER = {
+    A: { wide: ['family', 'qt', 'red', 'window', 'sea', 'tx2', 'ladder', 'rain', 'tx', 'lily'],
+         phone: ['family', 'qt', 'red', 'window', 'sea', 'ladder', 'tx', 'rain', 'lily'] },
+    F: { wide: ['family', 'window', 'sea'], phone: ['family', 'window', 'sea'] },
+    W: { wide: ['red', 'ladder', 'rain', 'tx', 'lily', 'qt'], phone: ['red', 'ladder', 'qt', 'rain', 'lily'] }
+  };
+  var counts = { A: photos.length, F: 0, W: 0 };
+  photos.forEach(function (p) { counts[CAT[p.id]]++; });
 
-  function listFor(mob) { return (mob ? orderPhone : orderWide).map(function (id) { return byId[id]; }); }
-  function photoList() { return listFor().filter(function (it) { return it.kind === 'photo'; }); }
+  function listFor(f, mob) { return ORDER[f][mob ? 'phone' : 'wide'].map(function (id) { return byId[id]; }); }
+  function photoList() { return listFor(s.gf, false).filter(function (it) { return it.kind === 'photo'; }); }
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
 
   // ---------- elements ----------
-  var grid = $('.gal-grid', section), cursor = $('.gcur', section);
+  var grid = $('.gal-grid', section), cursor = $('.gcur', section), fil = $('.gal-filters', section);
+  var filters = $$('button.gf', fil), shownEl = $('[data-gshown]', section);
   var pill = $('.gh-pill', section);
   var view = $('.gv', section), stage = $('.gv-stage', view), loupe = $('.loupe', view), strip = $('.gv-strip', view);
   var vCount = $('.gv-count', view), vN = $('.gv-n', view), vOf = $('.gv-of', view), vCat = $('.gv-cat', view);
@@ -163,7 +172,7 @@
     var gap = mob ? 10 : (tab ? 16 : 20);
     var targets = mob ? [196, 232, 180, 214] : (tab ? [300, 256, 320, 276] : [400, 330, 430, 350]);
     var maxRows = 99;
-    var list = listFor(mob), L = justify(list, W, gap, targets, mob);
+    var list = listFor(s.gf, mob), L = justify(list, W, gap, targets, mob);
     var rowsShown = L.rows.length;
     grid.style.height = (rowsShown ? L.rows[rowsShown - 1] : 0).toFixed(1) + 'px';
     var n = 0, shown = 0;
@@ -186,6 +195,12 @@
       el.style.setProperty('--d', (rr * 0.1 + q.col * 0.07).toFixed(2) + 's');
       cls(el, [base, vis ? 'in' : 'out', s.hot === it.id ? 'hot' : '', s.flyId === it.id ? 'fly' : ''].filter(Boolean).join(' '));
       if (it.kind === 'photo') el.disabled = !vis; else el.setAttribute('aria-hidden', String(!vis));
+    });
+    if (shownEl) shownEl.textContent = pad2(counts[s.gf]);
+    filters.forEach(function (b) {
+      var on = b.getAttribute('data-f') === s.gf;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', String(on));
     });
     section.classList.toggle('vopen', s.vOpen);
     grid.classList.toggle('hovering', !!s.hot);
@@ -247,6 +262,23 @@
       cls(im, i === pOn ? (s.piPrev < 0 ? 'on first' : 'on') : (i === pPrev ? 'leave' : ''));
     });
   }
+
+  // ---------- filters ----------
+  function placeU() {
+    var on = $('.gf.on', fil);
+    if (!on) return;
+    var br = fil.getBoundingClientRect(), r = on.getBoundingClientRect();
+    fil.style.setProperty('--ux', (r.left - br.left + fil.scrollLeft).toFixed(1) + 'px');
+    fil.style.setProperty('--uw', r.width.toFixed(1) + 'px');
+  }
+  filters.forEach(function (b) {
+    b.addEventListener('click', function () {
+      var f = b.getAttribute('data-f');
+      if (f === s.gf) return;
+      set({ gf: f, hot: '', pi: 0, piPrev: -1, piTick: s.piTick + 1 });
+      Promise.resolve().then(function () { requestAnimationFrame(placeU); });
+    });
+  });
 
   // ---------- hover focus + viewfinder cursor ----------
   grid.addEventListener('mousemove', function (e) {
@@ -399,6 +431,7 @@
     new ResizeObserver(function (en) {
       var w = en[0].contentRect.width;
       if (w > 0 && Math.abs(w - s.gw) > 0.5) set({ gw: w });
+      placeU();
     }).observe(grid);
   }
   if (typeof IntersectionObserver === 'function') {
@@ -413,4 +446,7 @@
     }, 2800);
   }
   render();
+  placeU();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeU);
+  window.addEventListener('resize', placeU, { passive: true });
 })();
